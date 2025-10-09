@@ -20,6 +20,10 @@ using namespace std;
     top_row_rotation_left:       complete
     bottom_row_rotation_right:   complete
     bottomn_row_rotation_left:   complete
+    front_face_rotation_right:
+    front_face_rotation_left:
+    back_face_rotation_right:
+    back_face_rotation_left:
 */
 
 class Cube{
@@ -319,6 +323,39 @@ class Cube{
         //cout << "\nfront:\n", print_face(front), cout << "\nleft:\n", print_face(left), cout << "\nback:\n", print_face(back), cout << "\nright:\n", print_face(right);
     }
 
+    void front_face_rotation_right()
+    {
+        int temp_top[3];
+        int temp_left[3];
+        int temp_right[3];
+        int temp_bottom[3];
+
+        //rotate the front face right first
+        rotate_right(front);
+
+        //then we nee to get the bottom row on the top
+        //the left column on the right side
+        //the top row on the bottom
+        //the right column on the left side
+        for (int i = 0; i < LENGTH; i++)
+        {
+             temp_top[i] = top[2][i];       // need to get the bottom row of the top face
+             temp_right[i] = right[i][0];   // need to get the left column of the right face
+             temp_bottom[i] = bottom[0][i]; // need to get the top row of the bottom face
+             temp_left[i] = left[i][2];     // need to get the right column of the left face
+        }
+
+        for (int i = 0; i < LENGTH; i++)
+        {
+            top[2][i] = temp_left[i];
+            right[i][0] = temp_top[i];
+            bottom[0][i] = temp_right[i];
+            left[i][2] = temp_bottom[i];
+        }
+
+      
+    }
+
     void fill_face(int face[3][3], int value)
     {
         for(int i = 0; i < LENGTH; i++)
@@ -482,7 +519,7 @@ class Cube{
 
     void solve_center_and_edges()
     {
-
+            //this will solve the center and edges...
     }
 };
     
@@ -490,36 +527,16 @@ int main()
 {
     Cube cube;
 
-    // Front
-    cube.front[0][0]=2; cube.front[0][1]=1; cube.front[0][2]=3;
-    cube.front[1][0]=6; cube.front[1][1]=1; cube.front[1][2]=5;
-    cube.front[2][0]=4; cube.front[2][1]=2; cube.front[2][2]=3;
+    cout << "LEFT: \n";
+    cube.print_face(cube.left); cout << "\n";
+    cout << "BOTTOM: \n";
+    cube.print_face(cube.bottom);
+    cube.front_face_rotation_right();
+    cout << "POST ROTATION: \n LEFT:\n";
+    cube.print_face(cube.left);
+    cout << "\n BOTTOM: \n";
+    cube.print_face(cube.bottom);
 
-    // Back
-    cube.back[0][0]=3; cube.back[0][1]=6; cube.back[0][2]=4;
-    cube.back[1][0]=5; cube.back[1][1]=3; cube.back[1][2]=2;
-    cube.back[2][0]=1; cube.back[2][1]=6; cube.back[2][2]=1;
-
-    // Left
-    cube.left[0][0]=5; cube.left[0][1]=2; cube.left[0][2]=4;
-    cube.left[1][0]=1; cube.left[1][1]=5; cube.left[1][2]=6;
-    cube.left[2][0]=3; cube.left[2][1]=2; cube.left[2][2]=1;
-
-    // Right
-    cube.right[0][0]=6; cube.right[0][1]=3; cube.right[0][2]=1;
-    cube.right[1][0]=4; cube.right[1][1]=6; cube.right[1][2]=2;
-    cube.right[2][0]=5; cube.right[2][1]=1; cube.right[2][2]=4;
-
-    // Top
-    cube.top[0][0]=2; cube.top[0][1]=4; cube.top[0][2]=5;
-    cube.top[1][0]=1; cube.top[1][1]=2; cube.top[1][2]=6;
-    cube.top[2][0]=3; cube.top[2][1]=5; cube.top[2][2]=1;
-
-    // Bottom
-    cube.bottom[0][0]=4; cube.bottom[0][1]=6; cube.bottom[0][2]=3;
-    cube.bottom[1][0]=2; cube.bottom[1][1]=4; cube.bottom[1][2]=1;
-    cube.bottom[2][0]=5; cube.bottom[2][1]=3; cube.bottom[2][2]=2;
-    cube.solve_cross();
     return 0;
 }
 
