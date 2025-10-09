@@ -20,7 +20,7 @@ using namespace std;
     top_row_rotation_left:       complete
     bottom_row_rotation_right:   complete
     bottomn_row_rotation_left:   complete
-    front_face_rotation_right:
+    front_face_rotation_right:   complete
     front_face_rotation_left:
     back_face_rotation_right:
     back_face_rotation_left:
@@ -352,8 +352,38 @@ class Cube{
             bottom[0][i] = temp_right[i];
             left[i][2] = temp_bottom[i];
         }
+    }
 
-      
+    void front_face_left_rotation()
+    {
+        int temp_top[3];
+        int temp_left[3];
+        int temp_right[3];
+        int temp_bottom[3];
+
+        //rotate the front face left first
+        rotate_left(front);
+
+        //then we need to get the bottom row on the top
+        //the left column on the right side
+        //the top row on the bottom
+        //the right column on the left side
+        for (int i = 0; i < LENGTH; i++)
+        {
+             temp_top[i] = top[2][i];       // need to get the bottom row of the top face
+             temp_right[i] = right[i][0];   // need to get the left column of the right face
+             temp_bottom[i] = bottom[0][i]; // need to get the top row of the bottom face
+             temp_left[i] = left[i][2];     // need to get the right column of the left face
+        }
+
+        for (int i = 0; i < LENGTH; i++)
+        {
+            top[2][i] = temp_right[i]; //top needs to become the temp_right
+            right[i][0] = temp_bottom[i]; //right needs to become temp_bottom
+            bottom[0][i] = temp_left[i]; //bottom needs to become temp_left
+            left[i][2] = temp_top[i]; //left needs to become temp_top
+        }
+
     }
 
     void fill_face(int face[3][3], int value)
@@ -493,7 +523,7 @@ class Cube{
         bool solved = false;
         random_device random_seed;                       // Seed
         mt19937 gen(random_seed());                      // Random generator
-        uniform_int_distribution<> dis(1, 8);            // Numbers 1 to 8
+        uniform_int_distribution<> dis(1, 9);            // Numbers 1 to 8
         
         while (!solved)
         {
@@ -507,6 +537,7 @@ class Cube{
                 case 6: right_column_up_rotation(); break;
                 case 7: left_column_up_rotation(); break;
                 case 8: left_column_down_rotation(); break;
+                case 9: front_face_rotation_right(); break;
                 default: break;
             }
             //solved = check_face(front) && check_face(left) && check_face(back) &&
