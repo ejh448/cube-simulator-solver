@@ -1,8 +1,6 @@
 #include <iostream>
 #include <string>
 #include <cstdlib>
-#include <chrono>
-#include <thread>
 #include <ctime>
 #include <random>
 
@@ -21,9 +19,9 @@ using namespace std;
     bottom_row_rotation_right:   complete
     bottomn_row_rotation_left:   complete
     front_face_rotation_right:   complete
-    front_face_rotation_left:
-    back_face_rotation_right:
-    back_face_rotation_left:
+    front_face_rotation_left:    complete
+    back_face_rotation_right:    complete
+    back_face_rotation_left:     complete
 */
 
 class Cube{
@@ -323,7 +321,7 @@ class Cube{
         //cout << "\nfront:\n", print_face(front), cout << "\nleft:\n", print_face(left), cout << "\nback:\n", print_face(back), cout << "\nright:\n", print_face(right);
     }
 
-    void front_face_rotation_right()
+    void front_face_right_rotation()
     {
         int temp_top[3];
         int temp_left[3];
@@ -364,10 +362,6 @@ class Cube{
         //rotate the front face left first
         rotate_left(front);
 
-        //then we need to get the bottom row on the top
-        //the left column on the right side
-        //the top row on the bottom
-        //the right column on the left side
         for (int i = 0; i < LENGTH; i++)
         {
              temp_top[i] = top[2][i];       // need to get the bottom row of the top face
@@ -386,6 +380,59 @@ class Cube{
 
     }
 
+    void back_face_right_rotation()
+    {
+        int temp_top[3];
+        int temp_left[3];
+        int temp_right[3];
+        int temp_bottom[3];
+
+        //rotate the back face right first
+        rotate_right(back);
+
+        for (int i = 0; i < LENGTH; i++)
+        {
+             temp_top[i] = top[0][i];         //need to get top row on top face
+             temp_right[i] = right[i][2];     //need to get right column on the right face
+             temp_bottom[i] = bottom[2][i];   //need to get the bottom row on the bottom face
+             temp_left[i] = left[i][0];       //need to get left column on the left face     
+        }
+
+        for (int i = 0; i < LENGTH; i++)
+        {
+            top[0][i] = temp_right[LENGTH - 1 - i];
+            right[i][2] = temp_bottom[i];
+            bottom[2][i] = temp_left[LENGTH - 1 - i];
+            left[i][0] = temp_top[i];
+        }
+    }
+    
+    void back_face_left_rotation()
+    {
+        int temp_top[3];
+        int temp_left[3];
+        int temp_right[3];
+        int temp_bottom[3];
+
+        rotate_left(back);
+
+        for (int i = 0; i < LENGTH; i++)
+        {
+            temp_top[i] = top[0][i];
+            temp_right[i] = right[i][2];
+            temp_bottom[i] = bottom[2][i];
+            temp_left[i] = left[i][0];
+        }
+
+        for (int i = 0; i < LENGTH; i++)
+        {
+            top[0][i] = temp_left[i];
+            right[i][2] = temp_top[LENGTH - 1 - i];
+            bottom[2][i] = temp_right[i];
+            left[i][0] = temp_bottom[LENGTH - 1 - i];
+        }
+    }
+
     void fill_face(int face[3][3], int value)
     {
         for(int i = 0; i < LENGTH; i++)
@@ -393,19 +440,6 @@ class Cube{
             for(int j = 0; j < LENGTH; j++)
             {
                 face[i][j] = value;
-            }
-        }
-    }
-
-    void fill_all_9(int face[3][3])
-    {
-        int x = 0;
-        for(int i = 0; i < LENGTH; i++)
-        {
-            for(int j = 0; j < LENGTH; j++)
-            {
-                face[i][j] = x;
-                x++;
             }
         }
     }
@@ -518,55 +552,144 @@ class Cube{
         cout << "\nfront:\n", print_face(front), cout << "\ntop:\n", print_face(top), cout << "\nback:\n", print_face(back), cout << "\nbottom:\n", print_face(bottom), cout << "\nleft:\n", print_face(left), cout << "\right:\n", print_face(right);
     }
 
-    void solve_cross()
+   void solve_cross()
+{
+    bool solved = false;
+    random_device random_seed;
+    mt19937 gen(random_seed());
+    uniform_int_distribution<> dis(1, 12);
+    
+    int lastMove = -1;
+
+    while (!solved)
     {
-        bool solved = false;
-        random_device random_seed;                       // Seed
-        mt19937 gen(random_seed());                      // Random generator
-        uniform_int_distribution<> dis(1, 9);            // Numbers 1 to 8
-        
-        while (!solved)
-        {
-            int move = dis(gen);
-            switch (move) {
-                case 1: top_row_left_rotation(); break;
-                case 2: top_row_right_rotation(); break;
-                case 3: bottom_row_left_rotation(); break;
-                case 4: bottom_row_right_rotation(); break;
-                case 5: right_column_down_rotation(); break;
-                case 6: right_column_up_rotation(); break;
-                case 7: left_column_up_rotation(); break;
-                case 8: left_column_down_rotation(); break;
-                case 9: front_face_rotation_right(); break;
-                default: break;
-            }
-            //solved = check_face(front) && check_face(left) && check_face(back) &&
-            //        check_face(right) && check_face(top) && check_face(bottom);
-            solved = check_cross(front);
+        int move = dis(gen);
+
+        if ((lastMove == 1 && move == 2) || (lastMove == 2 && move == 1) ||
+            (lastMove == 3 && move == 4) || (lastMove == 4 && move == 3) ||
+            (lastMove == 5 && move == 6) || (lastMove == 6 && move == 5) ||
+            (lastMove == 7 && move == 8) || (lastMove == 8 && move == 7) ||
+            (lastMove == 9 && move == 10) || (lastMove == 10 && move == 9) ||
+            (lastMove == 11 && move == 12) || (lastMove == 12 && move == 11)) {
+            continue; 
         }
-        cout << "solved!!!!!\n";
-        print_face(front);
+
+        switch (move) {
+            case 1: top_row_left_rotation(); break;
+            case 2: top_row_right_rotation(); break;
+            case 3: bottom_row_left_rotation(); break;
+            case 4: bottom_row_right_rotation(); break;
+            case 5: right_column_down_rotation(); break;
+            case 6: right_column_up_rotation(); break;
+            case 7: left_column_up_rotation(); break;
+            case 8: left_column_down_rotation(); break;
+            case 9: front_face_right_rotation(); break;
+            case 10: front_face_left_rotation(); break;
+            case 11: back_face_left_rotation(); break;
+            case 12: back_face_right_rotation(); break;
+        }
+
+        lastMove = move;
+
+        solved = check_cross(front) && (solve_edges() && set_corners());
     }
 
-    void solve_center_and_edges()
+    cout << "Cross solved!\n";
+    print_cube_net();
+}
+
+
+    bool solve_edges()
     {
-            //this will solve the center and edges...
+        return ((right[1][0] == right[1][1]) &&
+                (bottom[0][1] == bottom[1][1]) &&
+                (left[1][2] == left[1][1]) &&
+                (top[2][1] == top[1][1]));
     }
+
+    bool set_corners()
+    {
+        //possibly need to check for the edges?
+        return (right[0][0] == right[1][1] && right[2][0] == right[1][1]) &&
+                (left[0][2] == left[1][1] && left[2][2] == left[1][1]) &&
+                (top[2][0] == top[1][1] && top[2][2] == top[1][1]) &&
+                (bottom[0][0] == bottom[1][1] && bottom[0][2] == bottom [1][1]);
+    }
+
+void print_cube_net()
+{
+    auto print_row = [&](int face[3][3], int row) {
+        for (int j = 0; j < LENGTH; j++)
+            cout << face[row][j] << " ";
+    };
+
+    cout << "\nCUBE STATE (Net Layout):\n\n";
+
+    // Top face
+    for (int i = 0; i < LENGTH; i++) {
+        cout << "      ";      // indentation to center top
+        print_row(top, i);
+        cout << "\n";
+    }
+
+    // Left, Front, Right, Back faces
+    for (int i = 0; i < LENGTH; i++) {
+        print_row(left, i); cout << "  ";
+        print_row(front, i); cout << "  ";
+        print_row(right, i); cout << "  ";
+        print_row(back, i);
+        cout << "\n";
+    }
+
+    // Bottom face
+    for (int i = 0; i < LENGTH; i++) {
+        cout << "      ";
+        print_row(bottom, i);
+        cout << "\n";
+    }
+
+    cout << "\n";
+}
+
 };
+
+
+
     
 int main()
 {
     Cube cube;
+    // Front
+    cube.front[0][0]=1; cube.front[0][1]=1; cube.front[0][2]=2;
+    cube.front[1][0]=2; cube.front[1][1]=1; cube.front[1][2]=3;
+    cube.front[2][0]=2; cube.front[2][1]=4; cube.front[2][2]=5;
 
-    cout << "LEFT: \n";
-    cube.print_face(cube.left); cout << "\n";
-    cout << "BOTTOM: \n";
-    cube.print_face(cube.bottom);
-    cube.front_face_rotation_right();
-    cout << "POST ROTATION: \n LEFT:\n";
-    cube.print_face(cube.left);
-    cout << "\n BOTTOM: \n";
-    cube.print_face(cube.bottom);
+    // Back
+    cube.back[0][0]=6; cube.back[0][1]=3; cube.back[0][2]=4;
+    cube.back[1][0]=6; cube.back[1][1]=5; cube.back[1][2]=6;
+    cube.back[2][0]=4; cube.back[2][1]=5; cube.back[2][2]=4;
+
+    // Left
+    cube.left[0][0]=1; cube.left[0][1]=4; cube.left[0][2]=3;
+    cube.left[1][0]=5; cube.left[1][1]=3; cube.left[1][2]=1;
+    cube.left[2][0]=1; cube.left[2][1]=1; cube.left[2][2]=6;
+
+    // Right
+    cube.right[0][0]=5; cube.right[0][1]=5; cube.right[0][2]=1;
+    cube.right[1][0]=5; cube.right[1][1]=6; cube.right[1][2]=2;
+    cube.right[2][0]=3; cube.right[2][1]=3; cube.right[2][2]=5;
+
+    // Top
+    cube.top[0][0]=3; cube.top[0][1]=1; cube.top[0][2]=2;
+    cube.top[1][0]=3; cube.top[1][1]=2; cube.top[1][2]=2;
+    cube.top[2][0]=2; cube.top[2][1]=4; cube.top[2][2]=3;
+
+    // Bottom
+    cube.bottom[0][0]=5; cube.bottom[0][1]=6; cube.bottom[0][2]=4;
+    cube.bottom[1][0]=6; cube.bottom[1][1]=4; cube.bottom[1][2]=2;
+    cube.bottom[2][0]=6; cube.bottom[2][1]=4; cube.bottom[2][2]=6;
+
+    cube.solve_cross();
 
     return 0;
 }
