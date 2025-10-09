@@ -456,7 +456,7 @@ class Cube{
         bool solved = false;
         random_device random_seed;                       // Seed
         mt19937 gen(random_seed());                      // Random generator
-        uniform_int_distribution<> dis(1, 8);            // Numbers 1 to 9
+        uniform_int_distribution<> dis(1, 8);            // Numbers 1 to 8
         
         while (!solved)
         {
@@ -478,6 +478,11 @@ class Cube{
         }
         cout << "solved!!!!!\n";
         print_face(front);
+    }
+
+    void solve_center_and_edges()
+    {
+
     }
 };
     
