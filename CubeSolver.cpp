@@ -4,6 +4,8 @@
 #include <ctime>
 #include <random>
 
+
+
 using namespace std;
 
 /*
@@ -34,7 +36,8 @@ class Cube{
         int left[3][3];
         int right[3][3];
     
-    Cube(){
+    Cube()
+    {
         fill_face(front,  1);
         fill_face(top,    2);
         fill_face(back,   3);
@@ -552,50 +555,50 @@ class Cube{
         cout << "\nfront:\n", print_face(front), cout << "\ntop:\n", print_face(top), cout << "\nback:\n", print_face(back), cout << "\nbottom:\n", print_face(bottom), cout << "\nleft:\n", print_face(left), cout << "\right:\n", print_face(right);
     }
 
-   void solve_cross()
-{
-    bool solved = false;
-    random_device random_seed;
-    mt19937 gen(random_seed());
-    uniform_int_distribution<> dis(1, 12);
-    
-    int lastMove = -1;
-
-    while (!solved)
+    void solve_cross()
     {
-        int move = dis(gen);
+        bool solved = false;
+        random_device random_seed;
+        mt19937 gen(random_seed());
+        uniform_int_distribution<> dis(1, 12);
+        
+        int safety = 0;
 
-        if ((lastMove == 1 && move == 2) || (lastMove == 2 && move == 1) ||
-            (lastMove == 3 && move == 4) || (lastMove == 4 && move == 3) ||
-            (lastMove == 5 && move == 6) || (lastMove == 6 && move == 5) ||
-            (lastMove == 7 && move == 8) || (lastMove == 8 && move == 7) ||
-            (lastMove == 9 && move == 10) || (lastMove == 10 && move == 9) ||
-            (lastMove == 11 && move == 12) || (lastMove == 12 && move == 11)) {
-            continue; 
-        }
+        while (!solved)
+        {
+            int move = dis(gen);
 
-        switch (move) {
-            case 1: top_row_left_rotation(); break;
-            case 2: top_row_right_rotation(); break;
-            case 3: bottom_row_left_rotation(); break;
-            case 4: bottom_row_right_rotation(); break;
-            case 5: right_column_down_rotation(); break;
-            case 6: right_column_up_rotation(); break;
-            case 7: left_column_up_rotation(); break;
-            case 8: left_column_down_rotation(); break;
-            case 9: front_face_right_rotation(); break;
-            case 10: front_face_left_rotation(); break;
-            case 11: back_face_left_rotation(); break;
-            case 12: back_face_right_rotation(); break;
-        }
+            switch (move) {
+                case 1: top_row_left_rotation(); break;
+                case 2: top_row_right_rotation(); break;
+                case 3: bottom_row_left_rotation(); break;
+                case 4: bottom_row_right_rotation(); break;
+                case 5: right_column_down_rotation(); break;
+                case 6: right_column_up_rotation(); break;
+                case 7: left_column_up_rotation(); break;
+                case 8: left_column_down_rotation(); break;
+                case 9: front_face_right_rotation(); break;
+                case 10: front_face_left_rotation(); break;
+                case 11: back_face_left_rotation(); break;
+                case 12: back_face_right_rotation(); break;
+            }
 
-        lastMove = move;
+            safety++;
 
-        solved = check_cross(front) && (solve_edges() && set_corners());
+            solved = check_cross(front);
     }
 
-    cout << "Cross solved!\n";
-    print_cube_net();
+    if (solved)
+    {
+        cout << "Cross solved\n";
+        print_cube_net();
+        cout << "SAFETY: " << safety << "\n";
+    }
+    else
+    {
+        cout << "TOO MANY MOVES...\n";
+    }
+
 }
 
 
@@ -610,46 +613,55 @@ class Cube{
     bool set_corners()
     {
         //possibly need to check for the edges?
-        return (right[0][0] == right[1][1] && right[2][0] == right[1][1]) &&
+        bool solved = false;
+        while (!solved)
+        {
+            right_column_down_rotation();
+            bottom_row_left_rotation();
+            right_column_up_rotation();
+            bottom_row_right_rotation();
+            solved = (right[0][0] == right[1][1] && right[2][0] == right[1][1]) &&
                 (left[0][2] == left[1][1] && left[2][2] == left[1][1]) &&
                 (top[2][0] == top[1][1] && top[2][2] == top[1][1]) &&
                 (bottom[0][0] == bottom[1][1] && bottom[0][2] == bottom [1][1]);
+        }
+        return true;
     }
 
-void print_cube_net()
-{
-    auto print_row = [&](int face[3][3], int row) {
-        for (int j = 0; j < LENGTH; j++)
-            cout << face[row][j] << " ";
-    };
+    void print_cube_net()
+    {
+        auto print_row = [&](int face[3][3], int row) {
+            for (int j = 0; j < LENGTH; j++)
+                cout << face[row][j] << " ";
+        };
 
-    cout << "\nCUBE STATE (Net Layout):\n\n";
+        cout << "\nCUBE STATE (Net Layout):\n\n";
 
-    // Top face
-    for (int i = 0; i < LENGTH; i++) {
-        cout << "      ";      // indentation to center top
-        print_row(top, i);
+        // Top face
+        for (int i = 0; i < LENGTH; i++) {
+            cout << "      ";      // indentation to center top
+            print_row(top, i);
+            cout << "\n";
+        }
+
+        // Left, Front, Right, Back faces
+        for (int i = 0; i < LENGTH; i++) {
+            print_row(left, i); cout << "  ";
+            print_row(front, i); cout << "  ";
+            print_row(right, i); cout << "  ";
+            print_row(back, i);
+            cout << "\n";
+        }
+
+        // Bottom face
+        for (int i = 0; i < LENGTH; i++) {
+            cout << "      ";
+            print_row(bottom, i);
+            cout << "\n";
+        }
+
         cout << "\n";
     }
-
-    // Left, Front, Right, Back faces
-    for (int i = 0; i < LENGTH; i++) {
-        print_row(left, i); cout << "  ";
-        print_row(front, i); cout << "  ";
-        print_row(right, i); cout << "  ";
-        print_row(back, i);
-        cout << "\n";
-    }
-
-    // Bottom face
-    for (int i = 0; i < LENGTH; i++) {
-        cout << "      ";
-        print_row(bottom, i);
-        cout << "\n";
-    }
-
-    cout << "\n";
-}
 
 };
 
